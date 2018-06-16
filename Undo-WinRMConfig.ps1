@@ -40,6 +40,16 @@ Param (
   [switch]$RemoveShutdownScriptSetup
 )
 
+#This has to work for Win7 (no get-ciminstance) and Nano (no get-wmiobject) - each of which specially construct win32_operatingsystem.version to handle before and after Windows 10 version numbers (which are in different registry keys)
+If ($psversiontable.psversion.major -lt 3)
+{
+  $OSVersionString = (Get-WMIObject Win32_OperatingSystem).version
+}
+Else 
+{
+  $OSVersionString = (Get-CIMInstance Win32_OperatingSystem).version
+}
+
 #Build the undo script based on parameters
 [string]$UndoWinRMScript = ''
 
