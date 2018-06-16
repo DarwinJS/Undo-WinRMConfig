@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>undo-winrmconfig-during-shutdown</id>
+    <version>1.1.4</version>
+    <packageSourceUrl>https://github.com/DarwinJS/CloudyWindowsAutomationCode/tree/master/Undo-WinRMConfig</packageSourceUrl>
+    <owners>DarwinJS</owners>
+    <title>undo-winrmconfig-during-shutdown (Install)</title>
+    <authors>DarwinJS</authors>
+    <projectUrl>https://cloudywindows.io/winrm-for-provisioning---close-the-door-when-you-are-done-eh/</projectUrl>
+    <iconUrl>https://cdn.rawgit.com/DarwinJS/CloudyWindowsAutomationCode/ed51b898/Undo-WinRMConfig/chocolateypackaging/cloudywindows128.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <docsUrl>https://github.com/DarwinJS/CloudyWindowsAutomationCode/blob/master/Undo-WinRMConfig/readme.md</docsUrl>
+    <mailingListUrl>http://eepurl.com/cQbRwD</mailingListUrl>
+    <bugTrackerUrl>https://github.com/DarwinJS/CloudyWindowsAutomationCode/issues</bugTrackerUrl>
+    <tags>undo-winrmconfig-during-shutdown winrm packer admin</tags>
+    <summary>Attempts to return WinRM to a pristine state after it has been used for system preparation (e.g. Packer) using a self-deleting computer shutdown script.</summary>
+    <description>Disable winrm through a self-deleting shutdown task.
+     Many windows remote orchestration tools (e.g. Packer) instruct you to completely open up winrm permissions in a way that is not safe for production.
+     Usually there is no built in method nor instruction on how to re-secure it or shut it back down.
+     The assumption most likely being that you would handle proper winrm re-configuration as a part of production deployment.
+     This is not a least privileged approach - depending on how big your company is and how widely your hypervisor templates are used - this is a disaster waiting to happen.  So I feel leaving it in a disabled state by default is the far safer option.
+     To complicate things, if you attempt to secure winrm or shut it down as your last step in orchestration you slam the door on the orchestration system and it marks the attempt as a failure.
+     Due to imprecise timing, start up tasks that disable winrm could conflict with a subsequent attempt to re-enable it on the next boot for final configuration steps (especially if you are building a hypervisor template).
+     This self-deleting shutdown task performs the disable on the first shutdown and deletes itself.
+     If a system shutsdown extremely quickly there is some risk that the shutdown job would not be deleted - but in testing on AWS (very fast shutdown), there have not been an observed problems.
+    </description>
+    <releaseNotes>__REPLACE_OR_REMOVE__MarkDown_Okay</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+    <file src="..\Undo-WinRMConfig.ps1" target="tools" />
+    <file src="..\readme.md" target="tools" />
+  </files>
+</package>
