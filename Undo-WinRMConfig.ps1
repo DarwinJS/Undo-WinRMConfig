@@ -5,9 +5,10 @@
 .DESCRIPTION
   CloudyWindows.io DevOps Automation: https://github.com/DarwinJS/CloudyWindowsAutomationCode
   Why and How Blog Post: https://cloudywindows.io/winrm-for-provisioning---close-the-door-when-you-are-done-eh/
-  Invoke-Expression (invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/CloudyWindowsAutomationCode/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1')
-  Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/CloudyWindowsAutomationCode/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -immediately
-  
+  Invoke-Expression (invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/blob/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1')
+  Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/blob/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -immediately
+  Contributing New Undo Profiles: https://github.com/DarwinJS/Undo-WinRMConfig/blob/master/readme.md
+
   Disclaimer - this code was engineered and tested on Server 2012 R2.
 
   Many windows remote orchestration tools (e.g. Packer) instruct you to completely open up winrm permissions in a way that is not safe for production.
@@ -26,11 +27,11 @@
 .PARAMETER RunImmediately
   Specifies list of semi-colon seperated number ids of local Devices to initialize.  Devices appear in HKLM:SYSTEM\CurrentControlSet\Services\disk\Enum.
 .EXAMPLE
-  Invoke-Expression (invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/CloudyWindowsAutomationCode/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1')
+  Invoke-Expression (invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/blob/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1')
   
   Run directly from github with no parameters - sets up shutdown script to reseal winRM.
 .EXAMPLE
-  Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/CloudyWindowsAutomationCode/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -immediately
+  Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/blob/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -immediately
 
   Download dynamically from github and run immediately.
 #>
@@ -40,15 +41,52 @@ Param (
   [switch]$RemoveShutdownScriptSetup
 )
 
+If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent}
+
 #This has to work for Win7 (no get-ciminstance) and Nano (no get-wmiobject) - each of which specially construct win32_operatingsystem.version to handle before and after Windows 10 version numbers (which are in different registry keys)
 If ($psversiontable.psversion.major -lt 3)
-{
+{ 
   $OSVersionString = (Get-WMIObject Win32_OperatingSystem).version
 }
 Else 
 {
   $OSVersionString = (Get-CIMInstance Win32_OperatingSystem).version
 }
+
+If (!(Test-Path "$PSScriptRoot\$OSVersionString"))
+{ 
+  Throw "Undo-WinRMConfig does not have an undo profile for the OS version $OSVersionString, if you would like to create and contribute one, please see: "
+  Exit 5
+}
+
+#Disable all Enabled Firewall rules that address port 5985 and 5896 directly
+$EnabledInboundRMPorts = @(New-object -comObject HNetCfg.FwPolicy2).rules | where {($_.LocalPorts -ilike '*5985*') -AND ($_.Enabled -ilike 'True')}
+$EnabledInboundRMPorts += @(New-object -comObject HNetCfg.FwPolicy2).rules | where {($_.LocalPorts -ilike '*5986*') -AND ($_.Enabled -ilike 'True')}
+
+$UndoItemsForAll = @'
+ForEach ($FirewallRuleName in $EnabledInboundRMPorts)
+{
+  Write-Host "Disabling firewall rule that addresses remoting: `"$($FirewallRuleName.Name)`""
+  netsh advfirewall firewall set rule name="$($FirewallRuleName.Name)" new enable=No
+}
+
+
+ForEach ($File in (Get-ChildItem "$PSScriptRoot\$OSVersionString" | sort-object Name))
+{
+  If (($File.extension) -ieq '.reg')
+  {
+    Write-Host "Executing $OSVersionString\$($File.basename)"
+    reg.exe "$($File.fullname)"
+    If $?
+  }
+  If (($File.extension) -ieq '.ps1')
+  {
+    Write-Host "Executing $OSVersionString\$($File.name)"
+    & "$($File.fullname)"
+    If Error
+  }
+}
+'@
 
 #Build the undo script based on parameters
 [string]$UndoWinRMScript = ''

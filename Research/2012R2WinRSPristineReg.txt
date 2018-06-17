@@ -1,18 +1,5 @@
 Windows Registry Editor Version 5.00
 
-#SERVER 2012 R2 GUI
-
-#Remove LocalAccountTokenFilterPolicy for 32 and 64 bit
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\system]
-"LocalAccountTokenFilterPolicy"="-"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\system]
-"LocalAccountTokenFilterPolicy"="-"
-
-#Delete The Entire WSMAN Reg KEy
-[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN]
-
-#Reconstruct the WSMAN Reg Key from a this pristine copy
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN]
 "StackVersion"="2.0"
 "ServiceStackVersion"="3.0"
@@ -65,3 +52,4 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\WinRS]
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\WinRS\CustomRemoteShell]
+
