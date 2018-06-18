@@ -53,23 +53,40 @@ Else
   $OSVersionString = (Get-CIMInstance Win32_OperatingSystem).version
 }
 
-If (!(Test-Path "$PSScriptRoot\$OSVersionString"))
+If (!(Test-Path "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"))
 { 
-  Throw "Undo-WinRMConfig does not have an undo profile for the OS version $OSVersionString, if you would like to create and contribute one, please see: "
+  Throw "Undo-WinRMConfig does not have Pristine WSMan .REG file for your OS version $OSVersionString, if you would like to create and contribute one, please see: "
   Exit 5
 }
 
-#Disable all Enabled Firewall rules that address port 5985 and 5896 directly
+$UndoItemsForAll = @'
+
+If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent}
+
+#Disable all Enabled Firewall rules that address port 5985 or 5896 directly
 $EnabledInboundRMPorts = @(New-object -comObject HNetCfg.FwPolicy2).rules | where {($_.LocalPorts -ilike '*5985*') -AND ($_.Enabled -ilike 'True')}
 $EnabledInboundRMPorts += @(New-object -comObject HNetCfg.FwPolicy2).rules | where {($_.LocalPorts -ilike '*5986*') -AND ($_.Enabled -ilike 'True')}
 
-$UndoItemsForAll = @'
 ForEach ($FirewallRuleName in $EnabledInboundRMPorts)
 {
   Write-Host "Disabling firewall rule that addresses remoting: `"$($FirewallRuleName.Name)`""
   netsh advfirewall firewall set rule name="$($FirewallRuleName.Name)" new enable=No
 }
 
+Write-Host "Undoing changes for Enable-PSRemoting, Enable-WSManCredSSP and winrm configuration commands"
+
+Write-Host "Remove LocalAccountTokenFilterPolicy added by winrm configuration"
+$regkeypath ='HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\system'
+If (!((Get-ItemProperty $regkeypath).LocalAccountTokenFilterPolicy -eq $null)) 
+{Remove-ItemProperty -path $regkeypath -name LocalAccountTokenFilterPolicy}
+
+Write-Host "Enable-PSRemoting changes will be removed by undoing WSMAN changes"
+Write-Host "Enable-WSManCredSSP client or server changes will be removed by undoing WSMAN changes"
+
+#Remove WSMAN Key before importing pristine .REG
+Remove-Item 'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN' -Recurse -Force
+
+reg.exe "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"
 
 ForEach ($File in (Get-ChildItem "$PSScriptRoot\$OSVersionString" | sort-object Name))
 {
