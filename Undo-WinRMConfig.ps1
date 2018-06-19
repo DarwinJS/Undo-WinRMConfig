@@ -44,16 +44,11 @@ If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Pa
 
 #This has to work for Win7 (no get-ciminstance) and Nano (no get-wmiobject) - each of which specially construct win32_operatingsystem.version to handle before and after Windows 10 version numbers (which are in different registry keys)
 If ($psversiontable.psversion.major -lt 3)
-{ 
-  $OSMajorMinorVersionString = @(([version](Get-WMIObject Win32_OperatingSystem).version).major,([version](Get-WMIObject Win32_OperatingSystem).version).minor) -join '.'
-
-}
+{ $OSMajorMinorVersionString = @(([version](Get-WMIObject Win32_OperatingSystem).version).major,([version](Get-WMIObject Win32_OperatingSystem).version).minor) -join '.' }
 Else 
-{
-  $OSMajorMinorVersionString = @(([version](Get-CIMInstance Win32_OperatingSystem).version).major,([version](Get-CIMInstance Win32_OperatingSystem).version).minor) -join '.'
-}
+{ $OSMajorMinorVersionString = @(([version](Get-CIMInstance Win32_OperatingSystem).version).major,([version](Get-CIMInstance Win32_OperatingSystem).version).minor) -join '.' }
 
-If (!(Test-Path "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"))
+If (!(Test-Path "$PSScriptRoot\Pristine-WSMan-${OSMajorMinorVersionString}.reg"))
 { 
   Throw "Undo-WinRMConfig does not have Pristine WSMan .REG file for your OS version $OSMajorMinorVersionString, if you would like to create and contribute one, please see: "
   Exit 5
@@ -63,6 +58,12 @@ If (!(Test-Path "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"))
 [string]$UndoWinRMScript = @'
 
 If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent}
+
+#This has to work for Win7 (no get-ciminstance) and Nano (no get-wmiobject) - each of which specially construct win32_operatingsystem.version to handle before and after Windows 10 version numbers (which are in different registry keys)
+If ($psversiontable.psversion.major -lt 3)
+{ $OSMajorMinorVersionString = @(([version](Get-WMIObject Win32_OperatingSystem).version).major,([version](Get-WMIObject Win32_OperatingSystem).version).minor) -join '.' }
+Else 
+{ $OSMajorMinorVersionString = @(([version](Get-CIMInstance Win32_OperatingSystem).version).major,([version](Get-CIMInstance Win32_OperatingSystem).version).minor) -join '.' }
 
 Write-Host "Disabling all Enabled Firewall rules that address port 5985 or 5896 directly"
 $EnabledInboundRMPorts = @(New-object -comObject HNetCfg.FwPolicy2).rules | where-object {($_.LocalPorts -ilike '*5985*') -AND ($_.Enabled -ilike 'True')}
@@ -87,15 +88,16 @@ Write-Host "Enable-WSManCredSSP client or server changes will be removed by undo
 #Remove WSMAN Key before importing pristine .REG
 Remove-Item 'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN' -Recurse -Force
 
-reg.exe "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"
+reg.exe "$PSScriptRoot\Pristine-WSMan-${OSMajorMinorVersionString}.reg"
 
-ForEach ($File in (Get-ChildItem "$PSScriptRoot\*${OSVersionString}.reg" | sort-object Name))
+ForEach ($File in (Get-ChildItem "$PSScriptRoot\*${OSMajorMinorVersionString}.reg" | sort-object Name))
 {
   Write-Host "Importing $OSMajorMinorVersionString\$($File.name)"
   reg.exe import "$($File.fullname)"
 }
 '@
 
+Write-Host "The following script has been created as the undo script:"
 Write-Host "$UndoWinRMScript"
 
 If ($RunImmediately)
@@ -128,7 +130,7 @@ If (Test-Path $psScriptsFile)
   (Get-Content "$psScriptsFile") -replace '0CmdLine=$scriptfilename', '' | Set-Content "$psScriptsFile"
   (Get-Content "$psScriptsFile") -replace '0Parameters=', '' | Set-Content "$psScriptsFile"
 }
-Get-ChildItem $ScriptFolder\Pristine*.reg | remove-item -force
+Get-ChildItem "$PSScriptRoot\Pristine-WSMan-${OSMajorMinorVersionString}.reg" | remove-item -force
 "@
 
 $selfdeletescript =[Scriptblock]::Create($selfdeletescript)
