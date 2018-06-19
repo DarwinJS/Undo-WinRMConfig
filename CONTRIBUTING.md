@@ -1,15 +1,16 @@
 
 ## 
 
-### Find Out What Your OS Version Is:
+### Find Out What Your Major + Minor OS Version Is:
 
-Run this code to emit the version string that Undo-WinRMConfig will use:
+Run this code to emit the Major + Minor version string that Undo-WinRMConfig will use:
 
 ```
 If ($psversiontable.psversion.major -lt 3)
-{ Write-Host "OS Version String: $((Get-WMIObject Win32_OperatingSystem).version)" }
+{ $OSMajorMinorVersionString = @(([version](Get-WMIObject Win32_OperatingSystem).version).major,([version](Get-WMIObject Win32_OperatingSystem).version).minor) -join '.'}
 Else 
-{  Write-Host "OS Version String: $((Get-CIMInstance Win32_OperatingSystem).version)" }
+{ $OSMajorMinorVersionString = @(([version](Get-CIMInstance Win32_OperatingSystem).version).major,([version](Get-CIMInstance Win32_OperatingSystem).version).minor) -join '.'}
+Write-Host $OSMajorMinorVersionString
 ```
 
 [Check here](https://github.com/DarwinJS/Undo-WinRMConfig/tree/master/UndoProfiles) whether a profile has already been done for that version.
@@ -27,9 +28,10 @@ Please be careful about removing existing code as it may be applicable to scenar
 3. Run this code to detect your OS version string:
     ```
     If ($psversiontable.psversion.major -lt 3)
-    { Write-Host "OS Version String: $((Get-WMIObject Win32_OperatingSystem).version)" }
+    { $OSMajorMinorVersionString = @(([version](Get-WMIObject Win32_OperatingSystem).version).major,([version](Get-WMIObject Win32_OperatingSystem).version).minor) -join '.'}
     Else 
-    {  Write-Host "OS Version String: $((Get-CIMInstance     Win32_OperatingSystem).version)" }
+    { $OSMajorMinorVersionString = @(([version](Get-CIMInstance Win32_OperatingSystem).version).major,([version](Get-CIMInstance Win32_OperatingSystem).version).minor) -join '.'}
+    Write-Host $OSMajorMinorVersionString
     ```
 4. Export the registry key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN
 5. Name the file "Pristine-WSMan-<OSVersionStringFromAbove>" and place it next to Undo-WinRMConfig.ps1

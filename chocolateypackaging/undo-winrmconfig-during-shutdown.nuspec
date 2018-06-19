@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>undo-winrmconfig-during-shutdown</id>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <packageSourceUrl>https://github.com/DarwinJS/CloudyWindowsAutomationCode/tree/master/Undo-WinRMConfig</packageSourceUrl>
     <owners>DarwinJS</owners>
     <title>undo-winrmconfig-during-shutdown (Install)</title>
@@ -27,6 +27,9 @@
      If a system shutsdown extremely quickly there is some risk that the shutdown job would not be deleted - but in testing on AWS (very fast shutdown), there have not been an observed problems.
     </description>
     <releaseNotes>__REPLACE_OR_REMOVE__MarkDown_Okay</releaseNotes>
+    <dependencies>
+      <dependency id="chocolatey-core.extension" />
+    </dependencies>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />

@@ -45,16 +45,17 @@ If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Pa
 #This has to work for Win7 (no get-ciminstance) and Nano (no get-wmiobject) - each of which specially construct win32_operatingsystem.version to handle before and after Windows 10 version numbers (which are in different registry keys)
 If ($psversiontable.psversion.major -lt 3)
 { 
-  $OSVersionString = (Get-WMIObject Win32_OperatingSystem).version
+  $OSMajorMinorVersionString = @(([version](Get-WMIObject Win32_OperatingSystem).version).major,([version](Get-WMIObject Win32_OperatingSystem).version).minor) -join '.'
+
 }
 Else 
 {
-  $OSVersionString = (Get-CIMInstance Win32_OperatingSystem).version
+  $OSMajorMinorVersionString = @(([version](Get-CIMInstance Win32_OperatingSystem).version).major,([version](Get-CIMInstance Win32_OperatingSystem).version).minor) -join '.'
 }
 
 If (!(Test-Path "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"))
 { 
-  Throw "Undo-WinRMConfig does not have Pristine WSMan .REG file for your OS version $OSVersionString, if you would like to create and contribute one, please see: "
+  Throw "Undo-WinRMConfig does not have Pristine WSMan .REG file for your OS version $OSMajorMinorVersionString, if you would like to create and contribute one, please see: "
   Exit 5
 }
 
@@ -90,13 +91,12 @@ reg.exe "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"
 
 ForEach ($File in (Get-ChildItem "$PSScriptRoot\*${OSVersionString}.reg" | sort-object Name))
 {
-  Write-Host "Importing $OSVersionString\$($File.name)"
+  Write-Host "Importing $OSMajorMinorVersionString\$($File.name)"
   reg.exe import "$($File.fullname)"
 }
 '@
 
 Write-Host "$UndoWinRMScript"
-exit
 
 If ($RunImmediately)
 {
@@ -110,11 +110,11 @@ else
 }
 
 #Write a file and call it in a machine shutdown script
-$psScriptsFile = "C:\Windows\System32\GroupPolicy\Machine\Scripts\psscripts.ini"
+$psScriptsFile = "$env:windir\System32\GroupPolicy\Machine\Scripts\psscripts.ini"
 $Key1 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\Scripts\Shutdown\0'
 $Key2 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Scripts\Shutdown\0'
 $keys = @($key1,$key2)
-$scriptpath = "C:\Windows\System32\GroupPolicy\Machine\Scripts\Shutdown\disablepsremoting.ps1"
+$scriptpath = "$env:windir\System32\GroupPolicy\Machine\Scripts\Shutdown\disablepsremoting.ps1"
 $scriptfilename = (Split-Path -leaf $scriptpath)
 $ScriptFolder = (Split-Path -parent $scriptpath)
 
@@ -128,6 +128,7 @@ If (Test-Path $psScriptsFile)
   (Get-Content "$psScriptsFile") -replace '0CmdLine=$scriptfilename', '' | Set-Content "$psScriptsFile"
   (Get-Content "$psScriptsFile") -replace '0Parameters=', '' | Set-Content "$psScriptsFile"
 }
+Get-ChildItem $ScriptFolder\Pristine*.reg | remove-item -force
 "@
 
 $selfdeletescript =[Scriptblock]::Create($selfdeletescript)
@@ -143,13 +144,14 @@ $UndoWinRMScript += "Register-ScheduledJob -Name CleanUpWinRM -RunNow -Scheduled
 
 If (!(Test-Path $ScriptFolder)) {New-Item $ScriptFolder -type Directory -force}
 Set-Content -path $scriptpath -value $UndoWinRMScript
+Copy-Item "$PSScriptRoot\*.reg" "$env:windir\System32\GroupPolicy\Machine\Scripts\Shutdown" -Force
 
 Foreach ($Key in $keys)
 {
   New-Item -Path $key -Force | out-null
   New-ItemProperty -Path $key -Name GPO-ID -Value LocalGPO -Force | out-null
   New-ItemProperty -Path $key -Name SOM-ID -Value Local -Force | out-null
-  New-ItemProperty -Path $key -Name FileSysPath -Value "C:\Windows\System32\GroupPolicy\Machine" -Force | out-null
+  New-ItemProperty -Path $key -Name FileSysPath -Value "$env:windir\System32\GroupPolicy\Machine" -Force | out-null
   New-ItemProperty -Path $key -Name DisplayName -Value "Local Group Policy" -Force | out-null
   New-ItemProperty -Path $key -Name GPOName -Value "Local Group Policy" -Force | out-null
   New-ItemProperty -Path $key -Name PSScriptOrder -Value 1 -PropertyType "DWord" -Force | out-null
