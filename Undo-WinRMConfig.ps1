@@ -37,7 +37,6 @@
 #>
 Param (
   [switch]$RunImmediately,
-  [string[]]$UndoActions='allundo',
   [switch]$RemoveShutdownScriptSetup
 )
 
@@ -59,13 +58,14 @@ If (!(Test-Path "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"))
   Exit 5
 }
 
-$UndoItemsForAll = @'
+#Build the undo script based on parameters
+[string]$UndoWinRMScript = @'
 
 If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent}
 
-#Disable all Enabled Firewall rules that address port 5985 or 5896 directly
-$EnabledInboundRMPorts = @(New-object -comObject HNetCfg.FwPolicy2).rules | where {($_.LocalPorts -ilike '*5985*') -AND ($_.Enabled -ilike 'True')}
-$EnabledInboundRMPorts += @(New-object -comObject HNetCfg.FwPolicy2).rules | where {($_.LocalPorts -ilike '*5986*') -AND ($_.Enabled -ilike 'True')}
+Write-Host "Disabling all Enabled Firewall rules that address port 5985 or 5896 directly"
+$EnabledInboundRMPorts = @(New-object -comObject HNetCfg.FwPolicy2).rules | where-object {($_.LocalPorts -ilike '*5985*') -AND ($_.Enabled -ilike 'True')}
+$EnabledInboundRMPorts += @(New-object -comObject HNetCfg.FwPolicy2).rules | where-object {($_.LocalPorts -ilike '*5986*') -AND ($_.Enabled -ilike 'True')}
 
 ForEach ($FirewallRuleName in $EnabledInboundRMPorts)
 {
@@ -88,51 +88,12 @@ Remove-Item 'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN' -Recurse -For
 
 reg.exe "$PSScriptRoot\Pristine-WSMan-${OSVersionString}.reg"
 
-ForEach ($File in (Get-ChildItem "$PSScriptRoot\$OSVersionString" | sort-object Name))
+ForEach ($File in (Get-ChildItem "$PSScriptRoot\*${OSVersionString}.reg" | sort-object Name))
 {
-  If (($File.extension) -ieq '.reg')
-  {
-    Write-Host "Executing $OSVersionString\$($File.basename)"
-    reg.exe "$($File.fullname)"
-    If $?
-  }
-  If (($File.extension) -ieq '.ps1')
-  {
-    Write-Host "Executing $OSVersionString\$($File.name)"
-    & "$($File.fullname)"
-    If Error
-  }
+  Write-Host "Importing $OSVersionString\$($File.name)"
+  reg.exe import "$($File.fullname)"
 }
 '@
-
-#Build the undo script based on parameters
-[string]$UndoWinRMScript = ''
-
-If (($UndoActions -icontains 'undofirewall') -OR ($UndoActions -icontains 'allundo') -OR ($UndoActions -icontains 'all'))
-{
-  $UndoWinRMScript += @'
-
-netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=No
-'@
-}
-
-If (($UndoActions -icontains 'undowinrm') -OR ($UndoActions -icontains 'allundo') -OR ($UndoActions -icontains 'all'))
-{
-  $UndoWinRMScript += @'
-
-winrm invoke restore winrm/config '@{}'
-winrm invoke restore winrm/config/plugin '@{}'
-'@
-}
-
-If (($UndoActions -icontains 'undocredssp') -OR ($UndoActions -icontains 'allundo') -OR ($UndoActions -icontains 'all'))
-{
-  $UndoWinRMScript += @'
-
-winrm invoke restore winrm/config '@{}'
-winrm invoke restore winrm/config/plugin '@{}'
-'@
-}
 
 Write-Host "$UndoWinRMScript"
 exit
