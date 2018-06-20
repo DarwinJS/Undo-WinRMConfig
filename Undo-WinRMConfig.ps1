@@ -26,7 +26,7 @@
   Provisioning Automation
 .PARAMETER RunImmediately
   Specifies list of semi-colon seperated number ids of local Devices to initialize.  Devices appear in HKLM:SYSTEM\CurrentControlSet\Services\disk\Enum.
-.PARAMETER RemoveShutdownScriptSetup
+.PARAMETER RemoveShutdownScriptConfig
   Cancels running the script at the next shutdown by removing the shutdown configuration and files
 .PARAMETER Version
   Emits the version and exits.
@@ -41,7 +41,7 @@
 #>
 Param (
   [switch]$RunImmediately,
-  [switch]$RemoveShutdownScriptSetup,
+  [switch]$RemoveShutdownScriptConfig,
   [switch]$Version
 )
 
@@ -147,7 +147,7 @@ Function Setup-Undo {
 
   $selfdeletescript =[Scriptblock]::Create($selfdeletescript)
 
-  If ($RemoveShutdownScriptSetup)
+  If ($RemoveShutdownScriptConfig)
   {
     Write-Host "Removing previously setup shutdown script"
     Invoke-Command -ScriptBlock $selfdeletescript
@@ -187,6 +187,8 @@ Function Setup-Undo {
   "0CmdLine=$scriptfilename" | Out-File $psScriptsFile -Append
   "0Parameters=$parameters" | Out-File $psScriptsFile -Append
 }
+
+Write-Host "Undo-WinRMConfig (v${version}) is staged to run at next shutdown.  To unstage, run 'Undo-WinRMConfig -RemoveShutdownScriptConfig'"
 
 ${Pristine-WSMan-10.0.reg} = @'
 Windows Registry Editor Version 5.00
