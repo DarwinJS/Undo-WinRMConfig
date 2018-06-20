@@ -26,6 +26,10 @@
   Provisioning Automation
 .PARAMETER RunImmediately
   Specifies list of semi-colon seperated number ids of local Devices to initialize.  Devices appear in HKLM:SYSTEM\CurrentControlSet\Services\disk\Enum.
+.PARAMETER RemoveShutdownScriptSetup
+  Cancels running the script at the next shutdown by removing the shutdown configuration and files
+.PARAMETER Version
+  Emits the version and exits.
 .EXAMPLE
   Invoke-Expression (invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/blob/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1')
   
@@ -37,10 +41,21 @@
 #>
 Param (
   [switch]$RunImmediately,
-  [switch]$RemoveShutdownScriptSetup
+  [switch]$RemoveShutdownScriptSetup,
+  [switch]$Version
 )
 
+$ThisScriptVersion = '1.1.6'
+
+If ($version)
+{  
+  Write-Host "$ThisScriptVersion"
+  Exit 0
+}
+
 Function Setup-Undo {
+
+  Write-Host "`r`n`r`nUndo-WinRMConfig Version $ThisScriptVersion`r`n`r`n"
 
   #This has to work for Win7 (no get-ciminstance) and Nano (no get-wmiobject) - each of which specially construct win32_operatingsystem.version to handle before and after Windows 10 version numbers (which are in different registry keys)
   If ($psversiontable.psversion.major -lt 3)
