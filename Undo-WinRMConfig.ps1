@@ -45,7 +45,7 @@ Param (
   [switch]$Version
 )
 
-$ThisScriptVersion = '1.1.6'
+$ThisScriptVersion = '1.1.7'
 
 If ($version)
 {  
@@ -157,14 +157,14 @@ Function Setup-Undo {
   #Add the cleanup script block as a scheduled job executed immediately at the end of the shutdown script (if we aren't running immediately)
   $UndoWinRMScript += "Register-ScheduledJob -Name CleanUpWinRM -RunNow -ScheduledJobOption @{RunElevated=$True;ShowInTaskScheduler=$True;RunWithoutNetwork=$True} -ScriptBlock $selfdeletescript"
 
+  Write-Host "Creating $scriptpath, with the following contents:"
+  Write-Host "$UndoWinRMScript"
   If (!(Test-Path $ScriptFolder)) {New-Item $ScriptFolder -type Directory -force}
   Set-Content -path $scriptpath -value $UndoWinRMScript
 
-  Write-Host "The following script has been created as the undo script:"
-  Write-Host "$UndoWinRMScript"
-
   Foreach ($Key in $keys)
   {
+    Write-Host "Creating $Key"
     New-Item -Path $key -Force | out-null
     New-ItemProperty -Path $key -Name GPO-ID -Value LocalGPO -Force | out-null
     New-ItemProperty -Path $key -Name SOM-ID -Value Local -Force | out-null
@@ -181,6 +181,7 @@ Function Setup-Undo {
     New-ItemProperty -Path $key -Name "ExecTime" -Value 0 -PropertyType "QWord" -Force | out-null
   }
 
+  Write-Host "Updating $psScriptsFile"
   If (!(Test-Path $psScriptsFile)) {New-Item $psScriptsFile -type file -force}
   "[Shutdown]" | Out-File $psScriptsFile
   "0CmdLine=$scriptfilename" | Out-File $psScriptsFile -Append
