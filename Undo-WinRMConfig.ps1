@@ -188,7 +188,7 @@ Function Setup-Undo {
   "0Parameters=$parameters" | Out-File $psScriptsFile -Append
 }
 
-Write-Host "Undo-WinRMConfig (v${version}) is staged to run at next shutdown.  To unstage, run 'Undo-WinRMConfig -RemoveShutdownScriptConfig'"
+Write-Host "`r`n`r`nUndo-WinRMConfig (v${version}) is staged to run at next shutdown.  To unstage, run 'Undo-WinRMConfig -RemoveShutdownScriptConfig'"
 
 ${Pristine-WSMan-10.0.reg} = @'
 Windows Registry Editor Version 5.00
