@@ -41,7 +41,6 @@ Param (
 )
 
 Function Setup-Undo {
-  If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent}
 
   #This has to work for Win7 (no get-ciminstance) and Nano (no get-wmiobject) - each of which specially construct win32_operatingsystem.version to handle before and after Windows 10 version numbers (which are in different registry keys)
   If ($psversiontable.psversion.major -lt 3)
