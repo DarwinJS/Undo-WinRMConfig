@@ -9,7 +9,7 @@
   Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/blob/master/Undo-WinRMConfig/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -immediately
   Contributing New Undo Profiles: https://github.com/DarwinJS/Undo-WinRMConfig/blob/master/readme.md
 
-  Disclaimer - this code was engineered and tested on Server 2012 R2.
+  Disclaimer - this code was engineered and tested on Server 2012 R2 and Server 2016.
 
   Many windows remote orchestration tools (e.g. Packer) instruct you to completely open up winrm permissions in a way that is not safe for production.
   Usually there is no built in method nor instruction on how to re-secure it or shut it back down.
@@ -93,7 +93,8 @@ Function Setup-Undo {
   Write-Host "Undoing changes for Enable-PSRemoting, Enable-WSManCredSSP and winrm configuration commands"
 
   Write-Host "Remove LocalAccountTokenFilterPolicy added by winrm configuration"
-  $regkeypath ='HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\system'
+  #This key is symlinked into "Wow6432Node" - both locations are handled by one delete
+  $regkeypath ='HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\system'
   If (!((Get-ItemProperty $regkeypath).LocalAccountTokenFilterPolicy -eq $null)) 
   {Remove-ItemProperty -path $regkeypath -name LocalAccountTokenFilterPolicy}
 
