@@ -34,7 +34,7 @@ Please be careful about removing existing code as it may be applicable to scenar
     Write-Host $OSMajorMinorVersionString
     ```
 4. Export the registry key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN
-5. Name the file "Pristine-WSMan-<OSVersionStringFromAbove>" and place it next to Undo-WinRMConfig.ps1
+5. Name the file "Pristine-WSMan-<OSVersionStringFromAbove>" and carefully add it as a here string in Undo-WinRMConfig.ps1.  Follow the other examples to ensure that the OS lookup routine will find your addition.  Notice that only the first two segments of the OS Version number are used.
 6. Do NOT add any other registry keys to the file
 7. Test that your code works - both to return to pristine and that the system can reconfigure wsman with conventional methods.
   1. Configure wsman

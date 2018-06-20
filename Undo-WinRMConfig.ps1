@@ -45,7 +45,7 @@ Param (
   [switch]$Version
 )
 
-$ThisScriptVersion = '1.1.7'
+$ThisScriptVersion = '1.1.8'
 
 If ($version)
 {  
@@ -126,7 +126,7 @@ Function Setup-Undo {
   $Key1 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\Scripts\Shutdown\0'
   $Key2 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Scripts\Shutdown\0'
   $keys = @($key1,$key2)
-  $scriptpath = "$env:windir\System32\GroupPolicy\Machine\Scripts\Shutdown\undowinrmconfig.ps1"
+  $scriptpath = "$env:windir\System32\GroupPolicy\Machine\Scripts\Shutdown\Undo-WinRMConfig.ps1"
   $scriptfilename = (Split-Path -leaf $scriptpath)
   $ScriptFolder = (Split-Path -parent $scriptpath)
   $FileContents = Get-Variable -name "Pristine-WSMan-${OSMajorMinorVersionString}.reg" -ValueOnly
@@ -158,8 +158,10 @@ Function Setup-Undo {
   $UndoWinRMScript += "Register-ScheduledJob -Name CleanUpWinRM -RunNow -ScheduledJobOption @{RunElevated=$True;ShowInTaskScheduler=$True;RunWithoutNetwork=$True} -ScriptBlock $selfdeletescript"
 
   Write-Host "Creating $scriptpath, with the following contents:"
+  Write-Host '*******************'
   Write-Host "$UndoWinRMScript"
-  If (!(Test-Path $ScriptFolder)) {New-Item $ScriptFolder -type Directory -force}
+  Write-Host '*******************`r`n`r`n'
+  If (!(Test-Path $ScriptFolder)) {New-Item $ScriptFolder -type Directory -force | Out-null}
   Set-Content -path $scriptpath -value $UndoWinRMScript
 
   Foreach ($Key in $keys)
@@ -186,9 +188,9 @@ Function Setup-Undo {
   "[Shutdown]" | Out-File $psScriptsFile
   "0CmdLine=$scriptfilename" | Out-File $psScriptsFile -Append
   "0Parameters=$parameters" | Out-File $psScriptsFile -Append
-}
 
-Write-Host "`r`n`r`nUndo-WinRMConfig (v${version}) is staged to run at next shutdown.  To unstage, run 'Undo-WinRMConfig -RemoveShutdownScriptConfig'"
+  Write-Host "`r`n`r`nUndo-WinRMConfig (v${ThisScriptVersion}) is staged to run at next shutdown.  To unstage, run 'Undo-WinRMConfig -RemoveShutdownScriptConfig'"
+}
 
 ${Pristine-WSMan-10.0.reg} = @'
 Windows Registry Editor Version 5.00
