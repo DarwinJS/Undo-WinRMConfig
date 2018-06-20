@@ -89,17 +89,12 @@ Function Setup-Undo {
   #Remove WSMAN Key before importing pristine .REG
   Remove-Item 'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN' -Recurse -Force
 
-  reg.exe "$PSScriptRoot\Pristine-WSMan-${OSMajorMinorVersionString}.reg"
-
   ForEach ($File in (Get-ChildItem "$PSScriptRoot\*${OSMajorMinorVersionString}.reg" | sort-object Name))
   {
     Write-Host "Importing $OSMajorMinorVersionString\$($File.name)"
     reg.exe import "$($File.fullname)"
   }
 '@
-
-  Write-Host "The following script has been created as the undo script:"
-  Write-Host "$UndoWinRMScript"
 
   If ($RunImmediately)
   {
@@ -128,12 +123,12 @@ Function Setup-Undo {
   Remove-Item -Path "$key1" -Force -Recurse -ErrorAction SilentlyContinue
   Remove-Item -Path "$key2" -Force -Recurse -ErrorAction SilentlyContinue
   Remove-Item -Path $scriptpath -Force  -ErrorAction SilentlyContinue
+  Get-ChildItem "$env:windir\System32\GroupPolicy\Machine\Scripts\Shutdown\*${OSMajorMinorVersionString}.reg" | remove-item -force
   If (Test-Path $psScriptsFile)
   {
     (Get-Content "$psScriptsFile") -replace '0CmdLine=$scriptfilename', '' | Set-Content "$psScriptsFile"
     (Get-Content "$psScriptsFile") -replace '0Parameters=', '' | Set-Content "$psScriptsFile"
   }
-  Get-ChildItem "$PSScriptRoot\Pristine-WSMan-${OSMajorMinorVersionString}.reg" | remove-item -force
 "@
 
   $selfdeletescript =[Scriptblock]::Create($selfdeletescript)
@@ -145,11 +140,14 @@ Function Setup-Undo {
     exit $?
   }
 
+  #Add the cleanup script block as a scheduled job executed immediately at the end of the shutdown script (if we aren't running immediately)
   $UndoWinRMScript += "Register-ScheduledJob -Name CleanUpWinRM -RunNow -ScheduledJobOption @{RunElevated=$True;ShowInTaskScheduler=$True;RunWithoutNetwork=$True} -ScriptBlock $selfdeletescript"
 
   If (!(Test-Path $ScriptFolder)) {New-Item $ScriptFolder -type Directory -force}
   Set-Content -path $scriptpath -value $UndoWinRMScript
-  Copy-Item "$PSScriptRoot\*.reg" "$env:windir\System32\GroupPolicy\Machine\Scripts\Shutdown" -Force
+
+  Write-Host "The following script has been created as the undo script:"
+  Write-Host "$UndoWinRMScript"
 
   Foreach ($Key in $keys)
   {

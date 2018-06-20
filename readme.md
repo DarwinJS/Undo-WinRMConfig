@@ -63,6 +63,7 @@ At first glance, the code will appear a bit over complex, but that complexity ha
 1. If you attempt to revert WinRM configuration as your last step in automation that is using WinRM to access the machine - you slam the door on your own fingers and the automation will most likely exit with an error.  This is the exact scenario for Packer.
 2. Due to imprecise timing, **startup** tasks that disable winrm could conflict with a subsequent attempt to re-enable it on the next boot for final configuration steps.
 3. Setting up a shutdown script requires some manipulation of GPO files and registry keys.  To ensure appropriate security permissions no matter what user it used to execute this code, the setup is done via a scheduled job.
+4. Since this implementation merely stages the undo to happen at shutdown - the code can run at any point during before the very last shutdown - it does not have to run last (though at the point you run it, you should not need anymore reboots with winrm enabled to finish configuration)
 
 If you have the luxury of running this code locally on the build machine without using WinRM, then you can use the "RunImmediately" switch to skip the above convolutions.
 
