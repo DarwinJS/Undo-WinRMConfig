@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Initializes (full read of all bytes) AWS EBS volumes using FIO (File IO Utility).
-  See this post for full details on why this code is helpful: https://cloudywindows.io/winrm-for-provisioning---close-the-door-when-you-are-done-eh/
+  See this post for full details on why this code is helpful: https://cloudywindows.io/winrm-for-provisioning---close-the-door-on-the-way-out-eh/
 .DESCRIPTION
   CloudyWindows.io DevOps Automation: https://github.com/DarwinJS/CloudyWindowsAutomationCode
   Why and How Blog Post: https://cloudywindows.io/winrm-for-provisioning---close-the-door-when-you-are-done-eh/

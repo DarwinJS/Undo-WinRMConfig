@@ -94,17 +94,17 @@ This code was engineered and tested on Server 2012 R2 / PowerShell 4 - it is unk
 ## Place On Image Template Without Running
     Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1
 
-## Chocolatey Package
+## Chocolatey Package  (Pre-release - does not show up publicly
 
 **ATTENTION: While this code is in the community feedback phase, I have it on a test feed.  It will be available via chocolatey.org when the code is finalized**
 
 ### Run At Shutdown (default)
-    choco install undo-winrmconfig-at-shutdown -confirm -source https://www.myget.org/F/chocotesting/api/v2/
+    choco install undo-winrmconfig-at-shutdown -pre -confirm
 
 ### Run Immediately (Careful!)
 **Caution:** If you run this command while remoting in, you will slam the remoting connection closed and have a non-zero exit code.
 
-    choco install undo-winrmconfig-at-shutdown -confirm -params '"/RunImmediately"' -source https://www.myget.org/F/chocotesting/api/v2/
+    choco install undo-winrmconfig-at-shutdown -pre -confirm -params '"/RunImmediately"' -source https://www.myget.org/F/chocotesting/api/v2/
 
 ### Remove Shutdown Job Before It Runs
     
