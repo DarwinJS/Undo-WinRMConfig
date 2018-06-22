@@ -1,9 +1,15 @@
 
 ## 
+ 
+### Run The Code
+
+If it is the case, the code will emit the fact that your OS variant is not yet supported.
 
 ### Find Out What Your Major + Minor OS Version Is:
 
-Run this code to emit the Major + Minor version string that Undo-WinRMConfig will use:
+Run this code to emit the version string that Undo-WinRMConfig will use.
+
+**IMPORTANT**: Undo-WinRM only uses the Major + Minor versions to avoid a ton of duplicate registry keys for build level variations of Windows.  If you find a build-level variation of the wsman pristine registry key, please file an issue as it may require some re-thinking of how the core engine searches for and finds the right registry data for the pristine key (e.g. we may have to support build level lookup when, and only when, there are build-level variations in the pristine wsman reg key)
 
 ```
 If ($psversiontable.psversion.major -lt 3)
@@ -13,9 +19,8 @@ Else
 Write-Host $OSMajorMinorVersionString
 ```
 
-[Check here](https://github.com/DarwinJS/Undo-WinRMConfig/tree/master/UndoProfiles) whether a profile has already been done for that version.
 
-#### If a profile is already available:
+#### If a profile is already available, but you think it needs fixing:
 
 But you know for a fact that it is not working correctly for your scenario, you can update the code and submit a
 pull request with your proposed changes (and an explanation over what use case the original code did not cover that your scenario does).
