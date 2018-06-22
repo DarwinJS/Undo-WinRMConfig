@@ -22,9 +22,11 @@ Write-Host $OSMajorMinorVersionString
 
 #### If a profile is already available, but you think it needs fixing:
 
-But you know for a fact that it is not working correctly for your scenario, you can update the code and submit a
+You can update the code and submit a
 pull request with your proposed changes (and an explanation over what use case the original code did not cover that your scenario does).
 Please be careful about removing existing code as it may be applicable to scenarios you don't experience in your specific configuration.
+
+Please be aware that Undo-WinRMConfig will not be allowed to scope drift into a generic revert to pristine utility that reverses all manner of changes made during typical system preparation - it needs to stay laser focused on the core problem of WinRM Configurtion.  If you see other common needs similar to the one this code addresses, please propose it in an issue rather than building a pull request that assumes any type of settings reversion is in scope.
 
 #### If a profile is NOT already available:
 
