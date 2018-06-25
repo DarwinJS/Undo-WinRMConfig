@@ -3,17 +3,17 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>undo-winrmconfig-during-shutdown</id>
-    <version>1.1.8-alpha1</version>
+    <version>1.1.8-alpha2</version>
     <packageSourceUrl>https://github.com/DarwinJS/CloudyWindowsAutomationCode/tree/master/Undo-WinRMConfig</packageSourceUrl>
     <owners>DarwinJS</owners>
     <title>undo-winrmconfig-during-shutdown (Install)</title>
     <authors>DarwinJS</authors>
     <projectUrl>https://cloudywindows.io/winrm-for-provisioning---close-the-door-when-you-are-done-eh/</projectUrl>
-    <iconUrl>https://cdn.rawgit.com/DarwinJS/CloudyWindowsAutomationCode/ed51b898/Undo-WinRMConfig/chocolateypackaging/cloudywindows128.png</iconUrl>
+    <iconUrl>https://cdn.rawgit.com/DarwinJS/Undo-WinRMConfig/2fa5f0b4/chocolateypackaging/cloudywindows128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <docsUrl>https://github.com/DarwinJS/CloudyWindowsAutomationCode/blob/master/Undo-WinRMConfig/readme.md</docsUrl>
+    <docsUrl>https://github.com/DarwinJS/Undo-WinRMConfig/blob/master/readme.md</docsUrl>
     <mailingListUrl>http://eepurl.com/cQbRwD</mailingListUrl>
-    <bugTrackerUrl>https://github.com/DarwinJS/CloudyWindowsAutomationCode/issues</bugTrackerUrl>
+    <bugTrackerUrl>https://github.com/DarwinJS/Undo-WinRMConfig/issues</bugTrackerUrl>
     <tags>undo-winrmconfig-during-shutdown winrm packer admin</tags>
     <summary>Attempts to return WinRM to a pristine state after it has been used for system preparation (e.g. Packer) using a self-deleting computer shutdown script.</summary>
     <description>Disable winrm through a self-deleting shutdown task.
@@ -26,7 +26,6 @@
      This self-deleting shutdown task performs the disable on the first shutdown and deletes itself.
      If a system shutsdown extremely quickly there is some risk that the shutdown job would not be deleted - but in testing on AWS (very fast shutdown), there have not been an observed problems.
     </description>
-    <releaseNotes>__REPLACE_OR_REMOVE__MarkDown_Okay</releaseNotes>
     <dependencies>
       <dependency id="chocolatey-core.extension" />
     </dependencies>
