@@ -13,7 +13,7 @@
         - [Run Immediately (Careful!)](#run-immediately-careful)
         - [Remove Shutdown Job Before It Runs](#remove-shutdown-job-before-it-runs)
     - [Place On Image Template Without Running](#place-on-image-template-without-running)
-    - [Chocolatey Package](#chocolatey-package)
+    - [Chocolatey Package (Pre-release - does not show up publicly](#chocolatey-package-pre-release---does-not-show-up-publicly)
         - [Run At Shutdown (default)](#run-at-shutdown-default)
         - [Run Immediately (Careful!)](#run-immediately-careful)
         - [Remove Shutdown Job Before It Runs](#remove-shutdown-job-before-it-runs)
@@ -36,7 +36,9 @@ Run Scope:
 * Run under a system account service (choco / non-choco)
 
 OS / PowerShell Scope:
-* Windows 7 / 2008 R2, Windows 8.1 / 2012 R2, Windows 10 / 2016
+* Windows 2008 R2 (Tested) / Windows 7 (Windows Version 6.1)
+* Server 2012 R2 (Tested) / Windows 8.1 (Windows Version 6.3)
+* Server 2016 (Tested) / Windows 10 (Windows Version 10.0)
 
 # The Important Security Problem
 Many windows remote orchestration tools (e.g. Packer) instruct you to open up winrm permissions in a way that is not safe for (nor intended for) use in production.  (e.g. https://www.packer.io/docs/builders/ncloud.html#sample-code-of-template-json)  Generally there is no guidance on how to re-secure it nor even a reminder to do so.  The assumption most likely being that you would handle proper winrm re-configuration as a part of provisioning the machine - but in many organizations systems preparation may be the only use of WinRM - so it is forgotten.  Or maybe whatever you use to re-configure it does not actively manage one of the permissive settings used during machine provisioning.
