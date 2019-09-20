@@ -82,19 +82,19 @@ This code was engineered and tested on Server 2012 R2 / PowerShell 4 - it is unk
 ## Direct Run From GitHub
 
 ### Run Undo Process At Shutdown (default)
-    Invoke-Expression (invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1')
+    Invoke-Expression (Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1')
 
 ### Run Immediately (Careful!)
 **Caution:** If you run this command while remoting in, you will slam the remoting connection closed and have a non-zero exit code - does not work with packer.
     
-    Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -RunImmediately
+    Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -RunImmediately
 
 ### Remove Shutdown Job Before It Runs
     
-    Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -RemoveShutdownScriptConfig
+    Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1 ; & $env:public\Undo-WinRMConfig.ps1 -RemoveShutdownScriptConfig
 
 ## Place On Image Template Without Running
-    Invoke-webrequest -uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1
+    Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/DarwinJS/Undo-WinRMConfig/master/Undo-WinRMConfig.ps1' -outfile $env:public\Undo-WinRMConfig.ps1
 
 ## Chocolatey Package  (Pre-release - does not show up publicly
 
