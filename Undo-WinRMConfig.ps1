@@ -131,6 +131,7 @@ Function Setup-Undo {
   $scriptfilename = (Split-Path -leaf $scriptpath)
   $ScriptFolder = (Split-Path -parent $scriptpath)
   $FileContents = Get-Variable -name "Pristine-WSMan-${OSMajorMinorVersionString}.reg" -ValueOnly
+  New-Item -ItemType Directory -Force -Path $ScriptFolder
   Set-Content -Path "$ScriptFolder\Pristine-WSMan-${OSMajorMinorVersionString}.reg" -Value $FileContents
 
   $selfdeletescript = @"
