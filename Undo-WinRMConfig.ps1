@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Initializes (full read of all bytes) AWS EBS volumes using FIO (File IO Utility).
+  Revert WinRM to a pristine state.
   See this post for full details on why this code is helpful: https://cloudywindows.io/winrm-for-provisioning---close-the-door-on-the-way-out-eh/
 .DESCRIPTION
   CloudyWindows.io DevOps Automation: https://github.com/DarwinJS/CloudyWindowsAutomationCode
