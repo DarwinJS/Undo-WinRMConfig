@@ -114,7 +114,7 @@ Function Setup-Undo {
   If ($RunImmediately)
   {
     Write-Output 'Undoing WinRM Config Right Now (do NOT execute this over remoting or this code will not complete)...'  
-    Invoke-Command -ScriptBlock [Scriptblock]::Create($UndoWinRMScript)
+    Invoke-Command -ScriptBlock ([Scriptblock]::Create($UndoWinRMScript))
     exit 0
   }
   else 
